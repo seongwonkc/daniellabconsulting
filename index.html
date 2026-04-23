@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DanielLab · Consulting CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:        #f5f4f2;
+  --surface:   #ffffff;
+  --border:    #e2e0dc;
+  --accent:    #c8102e;
+  --accent-dim:#a30d25;
+  --text:      #111111;
+  --muted:     #888888;
+  --good:      #2a7a4f;
+  --warn:      #cc6600;
+  --radius:    10px;
+  --sans:      'DM Sans', sans-serif;
+  --serif:     'DM Serif Display', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.wrap {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+.logo {
+  font-family: var(--sans);
+  font-size: 1.3rem;
+  font-weight: 400;
+  text-align: center;
+  line-height: 1;
+}
+.logo .bold { color: var(--accent); font-weight: 700; }
+.logo .sub  { display: block; font-size: 0.65rem; color: var(--muted); letter-spacing: .08em; margin-top: 4px; }
+.card {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px 32px;
+}
+.card-title { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 8px; }
+.card-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; margin-bottom: 28px; }
+.portal-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: all 0.15s;
+}
+.portal-link:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px rgba(200,16,46,0.08);
+}
+.portal-title { font-weight: 700; margin-bottom: 4px; }
+.portal-sub { color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+.arrow { color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo">
+    The<span class="bold">Daniel</span>Lab
+    <span class="sub">고등부 Consulting</span>
+  </div>
+
+  <div class="card">
+    <h1 class="card-title">Consulting CRM</h1>
+    <p class="card-sub">Internal dashboard for DanielLab consulting staff.</p>
+
+    <a class="portal-link" href="consulting_login.html">
+      <span>
+        <span class="portal-title">Admin portal</span>
+        <span class="portal-sub">Sign in to manage students, activities, notes, and action items.</span>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+</div>
+
+<footer style="position:fixed;bottom:0;width:100%;text-align:center;padding:16px;font-size:0.72rem;color:#aaa;letter-spacing:0.04em;">Developed by Kevin Choi &nbsp;·&nbsp; Powered by SENECA AI</footer>
+</body>
+</html>
