@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DanielLab · Consulting Student</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+:root {
+  --bg:        #f5f4f2;
+  --surface:   #ffffff;
+  --border:    #e2e0dc;
+  --accent:    #c8102e;
+  --accent-dim:#a30d25;
+  --text:      #111111;
+  --muted:     #888888;
+  --good:      #2a7a4f;
+  --warn:      #cc6600;
+  --radius:    10px;
+  --sans:      'DM Sans', sans-serif;
+  --serif:     'DM Serif Display', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+.topnav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.nav-logo { font-family: var(--sans); font-size: 1rem; font-weight: 400; line-height: 1; color: var(--text); text-decoration: none; }
+.nav-logo .bold { color: var(--accent); font-weight: 700; }
+.nav-logo .sub { display:block; font-size:0.6rem; color:var(--muted); letter-spacing:.06em; margin-top:3px; }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.nav-user { font-size: 0.82rem; color: var(--muted); }
+.page-wrap { max-width: 1120px; margin: 0 auto; padding: 32px 24px 80px; }
+.profile-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.student-title { font-family: var(--serif); font-size: 2rem; line-height: 1.1; margin-bottom: 8px; }
+.student-meta { color: var(--muted); font-size: 0.86rem; line-height: 1.6; }
+.tab-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  gap: 4px;
+  padding: 0 14px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+.tab-btn {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 14px 14px 12px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.25s ease both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 14px;
+}
+.card-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.info-row { border-top: 1px solid var(--border); padding-top: 12px; }
+.info-label {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.info-value { font-size: 0.9rem; line-height: 1.55; white-space: pre-wrap; }
+.muted { color: var(--muted); }
+.btn {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 9px 18px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dim); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+.btn-danger { background: rgba(200,16,46,0.06); color: var(--accent); border: 1px solid rgba(200,16,46,0.14); }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; white-space: nowrap; }
+.badge-active  { background: #e8f5ee; color: #2a7a4f; }
+.badge-hold    { background: #fff4e5; color: #cc6600; }
+.badge-inactive{ background: #f0f0f0; color: #888; }
+.badge-gray { background: #f0f0f0; color: #888; }
+.badge-blue { background: rgba(26,86,219,0.06); color: #1a56db; }
+.badge-yellow { background: #fff8d8; color: #8a6200; }
+.badge-green { background: #e8f5ee; color: #2a7a4f; }
+.badge-red { background: rgba(200,16,46,0.06); color: #c8102e; }
+.badge-orange { background: #fff4e5; color: #cc6600; }
+.priority-urgent { color: #c8102e; font-weight: 700; }
+.priority-high   { color: #cc6600; }
+.priority-normal { color: #888; }
+.priority-low    { color: #aaa; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 0 10px 10px;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 13px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.84rem;
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+.form-card { display: none; }
+.form-card.open { display: block; }
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.field-grid.single { grid-template-columns: 1fr; }
+label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+input, select, textarea {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+.note-item, .task-item {
+  border-top: 1px solid var(--border);
+  padding: 16px 0;
+}
+.note-item:first-child, .task-item:first-child { border-top: none; padding-top: 0; }
+.note-title, .task-title { font-weight: 700; margin-bottom: 6px; }
+.note-meta, .task-meta { color: var(--muted); font-size: 0.75rem; margin-bottom: 8px; }
+.note-body, .task-body { font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; }
+.ai-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.ai-output { min-height: 260px; background: var(--bg); }
+.state-msg {
+  color: var(--muted);
+  font-size: 0.86rem;
+  padding: 22px 0;
+}
+@media (max-width: 900px) {
+  .profile-grid, .field-grid, .info-grid, .ai-actions { grid-template-columns: 1fr; }
+  .profile-header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="nav-logo" href="consulting_dashboard.html">
+    The<span class="bold">Daniel</span>Lab
+    <span class="sub">고등부 Consulting</span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-user">—</span>
+    <a class="btn btn-ghost btn-sm" href="consulting_dashboard.html">Dashboard</a>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<main class="page-wrap">
+  <section class="profile-header" id="student-header">
+    <div class="state-msg">Loading student profile…</div>
+  </section>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('profile', this)">Profile</button>
+    <button class="tab-btn" onclick="switchTab('activities', this)">Activities</button>
+    <button class="tab-btn" onclick="switchTab('notes', this)">Notes</button>
+    <button class="tab-btn" onclick="switchTab('actions', this)">Action Items</button>
+    <button class="tab-btn" onclick="switchTab('ai', this)">AI Assistant</button>
+  </div>
+
+  <section class="page active" id="page-profile">
+    <div id="profile-view"></div>
+    <div class="card form-card" id="profile-edit"></div>
+  </section>
+
+  <section class="page" id="page-activities">
+    <div class="card">
+      <div class="btn-row" style="justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="card-label" style="margin-bottom:4px;">Activities</div>
+          <div class="muted" style="font-size:.84rem;">Competitions, programs, research, internships, and projects.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openActivityForm()">+ Add activity</button>
+      </div>
+      <div id="activities-list"><div class="state-msg">Loading activities…</div></div>
+    </div>
+    <div class="card form-card" id="activity-form-card"></div>
+  </section>
+
+  <section class="page" id="page-notes">
+    <div class="card">
+      <div class="btn-row" style="justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="card-label" style="margin-bottom:4px;">Notes</div>
+          <div class="muted" style="font-size:.84rem;">Meeting notes, strategy updates, parent communications, and AI summaries.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="toggleNoteForm(true)">+ Add note</button>
+      </div>
+      <div class="form-card" id="note-form-card"></div>
+      <div id="notes-list"><div class="state-msg">Loading notes…</div></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-actions">
+    <div class="card">
+      <div class="btn-row" style="justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="card-label" style="margin-bottom:4px;">Action Items</div>
+          <div class="muted" style="font-size:.84rem;">Student-specific tasks with owner, priority, and due date.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="toggleActionForm(true)">+ Add item</button>
+      </div>
+      <div class="form-card" id="action-form-card"></div>
+      <div id="actions-list"><div class="state-msg">Loading action items…</div></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-ai">
+    <div class="card">
+      <div class="card-label">Gemini Assistant</div>
+      <div class="ai-actions">
+        <button class="btn btn-primary" onclick="runAi('summary')">Summarize Student Profile</button>
+        <button class="btn btn-primary" onclick="runAi('activities')">Suggest Next EC Activities</button>
+        <button class="btn btn-primary" onclick="runAi('kakao')">Draft Parent KakaoTalk Update</button>
+      </div>
+      <textarea class="ai-output" id="ai-output" readonly placeholder="AI output will appear here."></textarea>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn btn-ghost" onclick="saveAiAsNote()">Save as Note</button>
+        <span class="muted" id="ai-state" style="font-size:.84rem;"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+function requireAuth() {
+  const name = sessionStorage.getItem('dl_admin_name');
+  if (!name) window.location.href = 'consulting_login.html';
+}
+requireAuth();
+
+function getConfig() {
+  return {
+    url: (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_URL) || localStorage.getItem('dl_sb_url') || '',
+    key: (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY) || localStorage.getItem('dl_sb_key') || '',
+    gemini: (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_KEY) || '',
+  };
+}
+
+const studentId = new URLSearchParams(window.location.search).get('id');
+let client = null;
+let currentStudent = null;
+let activities = [];
+let notes = [];
+let actionItems = [];
+let teachers = [];
+let editingActivityId = null;
+let lastAiTitle = 'AI Summary';
+
+if (!studentId) {
+  document.getElementById('student-header').innerHTML = '<div class="state-msg">Missing student id.</div>';
+}
+
+document.getElementById('nav-user').textContent = sessionStorage.getItem('dl_admin_name') || '—';
+
+function getClient() {
+  if (client) return client;
+  const { url, key } = getConfig();
+  if (!url || !key) throw new Error('Not configured');
+  const { createClient } = window.supabase;
+  client = createClient(url, key);
+  return client;
+}
+
+async function getToken() {
+  const { data } = await getClient().auth.getSession();
+  if (!data.session?.access_token) {
+    sessionStorage.clear();
+    window.location.href = 'consulting_login.html';
+    throw new Error('Not authenticated');
+  }
+  return data.session.access_token;
+}
+
+async function sbFetch(path, opts = {}) {
+  const { url, key } = getConfig();
+  if (!url || !key) throw new Error('Not configured');
+  const token = await getToken();
+  const res = await fetch(`${url}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': key,
+      'Authorization': `Bearer ${token}`,
+      ...opts.headers,
+    },
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.message || res.status);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+async function loadAll() {
+  if (!studentId) return;
+  try {
+    const [studentRows, activityRows, noteRows, actionRows, teacherRows] = await Promise.all([
+      sbFetch(`consulting_students?id=eq.${studentId}&select=*`),
+      sbFetch(`consulting_activities?student_id=eq.${studentId}&select=*&order=deadline.asc`),
+      sbFetch(`consulting_notes?student_id=eq.${studentId}&select=*&order=created_at.desc`),
+      sbFetch(`consulting_action_items?student_id=eq.${studentId}&select=*&order=due_date.asc`),
+      sbFetch('teachers?select=id,name&order=name.asc').catch(() => []),
+    ]);
+    currentStudent = studentRows?.[0] || null;
+    activities = activityRows || [];
+    notes = noteRows || [];
+    actionItems = actionRows || [];
+    teachers = teacherRows || [];
+
+    if (!currentStudent) {
+      document.getElementById('student-header').innerHTML = '<div class="state-msg">Student not found.</div>';
+      return;
+    }
+
+    renderHeader();
+    renderProfile();
+    renderActivities();
+    renderNotes();
+    renderActionItems();
+  } catch (e) {
+    const message = e.message === 'Not configured'
+      ? 'Supabase not configured. Add SUPABASE_KEY to config.js or Netlify env vars.'
+      : `Error: ${e.message}`;
+    document.getElementById('student-header').innerHTML = `<div class="state-msg">${escapeHtml(message)}</div>`;
+  }
+}
+
+function renderHeader() {
+  const s = currentStudent;
+  document.title = `DanielLab · ${s.name_ko || s.name_en || 'Student'}`;
+  document.getElementById('student-header').innerHTML = `
+    <div>
+      <div class="eyebrow">Student profile</div>
+      <h1 class="student-title">${escapeHtml(s.name_ko || 'Unnamed')}${s.name_en ? ` · ${escapeHtml(s.name_en)}` : ''}</h1>
+      <div class="student-meta">
+        ${escapeHtml(s.school_current || 'No school listed')} · ${escapeHtml(s.grade_year || 'No grade listed')}
+        ${s.school_next ? `<br>→ ${escapeHtml(s.school_next)} ${s.school_next_date ? '(' + escapeHtml(s.school_next_date) + ')' : ''}` : ''}
+      </div>
+    </div>
+    <div class="btn-row">
+      ${statusBadge(s.status)}
+      <button class="btn btn-primary btn-sm" onclick="toggleProfileEdit(true)">Edit</button>
+    </div>
+  `;
+}
+
+function renderProfile() {
+  const s = currentStudent;
+  const consultant = teachers.find(t => t.id === s.consultant_id)?.name || '—';
+  document.getElementById('profile-view').innerHTML = `
+    <div class="profile-grid">
+      <div class="card">
+        <div class="card-label">Narrative</div>
+        <div class="info-value">${escapeHtml(s.narrative || 'No narrative yet.')}</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Spike / Focus</div>
+        <div class="info-value">${escapeHtml(s.spike || '—')}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="info-grid">
+        ${infoRow('Target major', s.target_major)}
+        ${infoRow('Target schools', s.target_schools)}
+        ${infoRow('Parent', [s.parent_name, s.parent_kakao, s.parent_contact].filter(Boolean).join(' · '))}
+        ${infoRow('Preferred contact', s.preferred_contact)}
+        ${infoRow('Assigned consultant', consultant)}
+        ${infoRow('Internal notes', s.notes)}
+      </div>
+      <div style="margin-top:16px;">
+        ${s.sat_student_id ? `<a class="btn btn-ghost btn-sm" href="daniellab_dashboard.html?student_id=${encodeURIComponent(s.sat_student_id)}">Open SAT CRM link</a>` : '<span class="muted" style="font-size:.84rem;">No SAT CRM link.</span>'}
+      </div>
+    </div>
+  `;
+}
+
+function infoRow(label, value) {
+  return `
+    <div class="info-row">
+      <div class="info-label">${escapeHtml(label)}</div>
+      <div class="info-value">${escapeHtml(value || '—')}</div>
+    </div>
+  `;
+}
+
+function toggleProfileEdit(open) {
+  const el = document.getElementById('profile-edit');
+  if (!open) {
+    el.classList.remove('open');
+    return;
+  }
+  const s = currentStudent;
+  el.classList.add('open');
+  el.innerHTML = `
+    <div class="card-label">Edit profile</div>
+    <div class="field-grid">
+      ${inputField('edit-name-ko', '이름 (Korean)', s.name_ko || '')}
+      ${inputField('edit-name-en', '이름 (English)', s.name_en || '')}
+      ${inputField('edit-grade-year', 'Grade Year', s.grade_year || '')}
+      ${inputField('edit-school-current', 'Current School', s.school_current || '')}
+      ${inputField('edit-school-next', 'School Next', s.school_next || '')}
+      ${inputField('edit-school-next-date', 'School Next Date', s.school_next_date || '')}
+      ${inputField('edit-target-major', 'Target Major', s.target_major || '')}
+      ${inputField('edit-target-schools', 'Target Schools', s.target_schools || '')}
+      ${selectField('edit-status', 'Status', ['active','hold','inactive','graduated'], s.status || 'active')}
+      ${selectField('edit-preferred-contact', 'Preferred Contact', ['kakao','phone','email'], s.preferred_contact || 'kakao')}
+      ${inputField('edit-parent-name', 'Parent Name', s.parent_name || '')}
+      ${inputField('edit-parent-kakao', 'Parent KakaoTalk ID', s.parent_kakao || '')}
+      ${inputField('edit-parent-contact', 'Parent Contact', s.parent_contact || '')}
+      ${teacherSelectField('edit-consultant-id', 'Assigned Consultant', s.consultant_id || '')}
+      ${inputField('edit-sat-student-id', 'SAT CRM Link UUID', s.sat_student_id || '')}
+    </div>
+    <div class="field-grid single">
+      ${textareaField('edit-narrative', 'Narrative', s.narrative || '')}
+      ${textareaField('edit-spike', 'Spike / Focus', s.spike || '')}
+      ${textareaField('edit-notes', 'Internal Notes', s.notes || '')}
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveProfile()">Save profile</button>
+      <button class="btn btn-ghost" onclick="toggleProfileEdit(false)">Cancel</button>
+    </div>
+  `;
+}
+
+async function saveProfile() {
+  const updates = {
+    name_ko: value('edit-name-ko'),
+    name_en: nullable(value('edit-name-en')),
+    grade_year: nullable(value('edit-grade-year')),
+    school_current: nullable(value('edit-school-current')),
+    school_next: nullable(value('edit-school-next')),
+    school_next_date: nullable(value('edit-school-next-date')),
+    narrative: nullable(value('edit-narrative')),
+    spike: nullable(value('edit-spike')),
+    target_major: nullable(value('edit-target-major')),
+    target_schools: nullable(value('edit-target-schools')),
+    status: value('edit-status') || 'active',
+    notes: nullable(value('edit-notes')),
+    consultant_id: nullable(value('edit-consultant-id')),
+    sat_student_id: nullable(value('edit-sat-student-id')),
+    parent_name: nullable(value('edit-parent-name')),
+    parent_kakao: nullable(value('edit-parent-kakao')),
+    parent_contact: nullable(value('edit-parent-contact')),
+    preferred_contact: value('edit-preferred-contact') || 'kakao',
+  };
+  if (!updates.name_ko) { alert('Korean name is required.'); return; }
+  await sbFetch(`consulting_students?id=eq.${studentId}`, {
+    method: 'PATCH',
+    headers: { 'Prefer': 'return=minimal' },
+    body: JSON.stringify(updates),
+  });
+  currentStudent = { ...currentStudent, ...updates };
+  toggleProfileEdit(false);
+  renderHeader();
+  renderProfile();
+}
+
+function renderActivities() {
+  if (!activities.length) {
+    document.getElementById('activities-list').innerHTML = '<div class="state-msg">No activities yet.</div>';
+    return;
+  }
+  const rows = activities
+    .slice()
+    .sort((a, b) => dateValue(a.deadline) - dateValue(b.deadline))
+    .map(a => `
+      <tr>
+        <td><strong>${escapeHtml(a.name)}</strong>${a.description ? `<div class="muted" style="font-size:.75rem;margin-top:3px;">${escapeHtml(a.description)}</div>` : ''}</td>
+        <td>${escapeHtml(labelize(a.category || 'other'))}</td>
+        <td>${escapeHtml(a.timing || '—')}</td>
+        <td>${escapeHtml(a.deadline || a.deadline_note || '—')}</td>
+        <td>${activityBadge(a.status)}</td>
+        <td>${escapeHtml(a.result || '—')}</td>
+        <td>${escapeHtml(a.assigned_to || '—')}</td>
+        <td>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-sm" onclick="openActivityForm('${a.id}')">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteActivity('${a.id}')">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  document.getElementById('activities-list').innerHTML = `
+    <table>
+      <thead><tr><th>Activity</th><th>Category</th><th>Timing</th><th>Deadline</th><th>Status</th><th>Result</th><th>Assigned To</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function openActivityForm(id = null) {
+  editingActivityId = id;
+  const a = id ? activities.find(x => x.id === id) : {};
+  const el = document.getElementById('activity-form-card');
+  el.classList.add('open');
+  el.innerHTML = `
+    <div class="card-label">${id ? 'Edit activity' : 'Add activity'}</div>
+    <div class="field-grid">
+      ${inputField('act-name', 'Activity name', a?.name || '')}
+      ${selectField('act-category', 'Category', ['competition','program','research','internship','volunteer','project','other'], a?.category || 'other')}
+      ${inputField('act-timing', 'Timing', a?.timing || '')}
+      ${inputField('act-deadline', 'Deadline', a?.deadline || '', 'date')}
+      ${inputField('act-deadline-note', 'Deadline note', a?.deadline_note || '')}
+      ${selectField('act-status', 'Status', ['planned','in_progress','submitted','completed','rejected','waitlisted','accepted','cancelled'], a?.status || 'planned')}
+      ${inputField('act-result', 'Result', a?.result || '')}
+      ${inputField('act-result-date', 'Result Date', a?.result_date || '', 'date')}
+      ${inputField('act-assigned-to', 'Assigned To', a?.assigned_to || '')}
+      ${inputField('act-url', 'URL', a?.url || '')}
+      ${inputField('act-cost-note', 'Cost Note', a?.cost_note || '')}
+    </div>
+    <div class="field-grid single">
+      ${textareaField('act-description', 'Description', a?.description || '')}
+      ${textareaField('act-internal-note', 'Internal Note', a?.internal_note || '')}
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveActivity()">Save activity</button>
+      <button class="btn btn-ghost" onclick="closeActivityForm()">Cancel</button>
+    </div>
+  `;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeActivityForm() {
+  editingActivityId = null;
+  document.getElementById('activity-form-card').classList.remove('open');
+}
+
+async function saveActivity() {
+  const payload = {
+    student_id: studentId,
+    name: value('act-name'),
+    category: nullable(value('act-category')),
+    description: nullable(value('act-description')),
+    timing: nullable(value('act-timing')),
+    deadline: nullable(value('act-deadline')),
+    deadline_note: nullable(value('act-deadline-note')),
+    status: value('act-status') || 'planned',
+    result: nullable(value('act-result')),
+    result_date: nullable(value('act-result-date')),
+    url: nullable(value('act-url')),
+    cost_note: nullable(value('act-cost-note')),
+    internal_note: nullable(value('act-internal-note')),
+    assigned_to: nullable(value('act-assigned-to')),
+  };
+  if (!payload.name) { alert('Activity name is required.'); return; }
+  if (editingActivityId) {
+    await sbFetch(`consulting_activities?id=eq.${editingActivityId}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify(payload),
+    });
+  } else {
+    await sbFetch('consulting_activities', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify(payload),
+    });
+  }
+  closeActivityForm();
+  await reloadCollection('activities');
+}
+
+async function deleteActivity(id) {
+  if (!confirm('Delete this activity?')) return;
+  await sbFetch(`consulting_activities?id=eq.${id}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+  await reloadCollection('activities');
+}
+
+function toggleNoteForm(open) {
+  const el = document.getElementById('note-form-card');
+  if (!open) {
+    el.classList.remove('open');
+    return;
+  }
+  el.classList.add('open');
+  el.innerHTML = `
+    <div class="field-grid">
+      ${selectField('note-type', 'Note type', ['meeting','strategy','parent_comms','internal','ai_summary'], 'meeting')}
+      ${inputField('note-author', 'Author', sessionStorage.getItem('dl_admin_name') || '')}
+      ${inputField('note-title', 'Title', '')}
+      ${selectField('note-contact-method', 'Contact Method', ['','kakao','phone','email'], '')}
+    </div>
+    <div class="field-grid single">${textareaField('note-content', 'Content', '')}</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveNote()">Save note</button>
+      <button class="btn btn-ghost" onclick="toggleNoteForm(false)">Cancel</button>
+    </div>
+  `;
+}
+
+async function saveNote() {
+  const payload = {
+    student_id: studentId,
+    note_type: value('note-type') || 'meeting',
+    author: nullable(value('note-author')),
+    title: nullable(value('note-title')),
+    content: value('note-content'),
+    contact_method: nullable(value('note-contact-method')),
+  };
+  if (!payload.content) { alert('Note content is required.'); return; }
+  await sbFetch('consulting_notes', {
+    method: 'POST',
+    headers: { 'Prefer': 'return=minimal' },
+    body: JSON.stringify(payload),
+  });
+  toggleNoteForm(false);
+  await reloadCollection('notes');
+}
+
+function renderNotes() {
+  if (!notes.length) {
+    document.getElementById('notes-list').innerHTML = '<div class="state-msg">No notes yet.</div>';
+    return;
+  }
+  document.getElementById('notes-list').innerHTML = notes.map(n => `
+    <div class="note-item">
+      <div class="btn-row" style="justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="note-title">${escapeHtml(n.title || labelize(n.note_type || 'note'))}</div>
+          <div class="note-meta">${noteTypeBadge(n.note_type)} · ${escapeHtml(n.author || 'Unknown')} · ${escapeHtml(formatDateTime(n.created_at))}${n.contact_method ? ' · ' + escapeHtml(n.contact_method) : ''}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteNote('${n.id}')">Delete</button>
+      </div>
+      <div class="note-body">${escapeHtml(n.content)}</div>
+    </div>
+  `).join('');
+}
+
+async function deleteNote(id) {
+  if (!confirm('Delete this note?')) return;
+  await sbFetch(`consulting_notes?id=eq.${id}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+  await reloadCollection('notes');
+}
+
+function toggleActionForm(open) {
+  const el = document.getElementById('action-form-card');
+  if (!open) {
+    el.classList.remove('open');
+    return;
+  }
+  el.classList.add('open');
+  el.innerHTML = `
+    <div class="field-grid">
+      ${inputField('task-title', 'Title', '')}
+      ${inputField('task-owner', 'Owner', '')}
+      ${inputField('task-due-date', 'Due date', '', 'date')}
+      ${selectField('task-priority', 'Priority', ['urgent','high','normal','low'], 'normal')}
+    </div>
+    <div class="field-grid single">${textareaField('task-description', 'Description', '')}</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveActionItem()">Save item</button>
+      <button class="btn btn-ghost" onclick="toggleActionForm(false)">Cancel</button>
+    </div>
+  `;
+}
+
+async function saveActionItem() {
+  const payload = {
+    student_id: studentId,
+    title: value('task-title'),
+    description: nullable(value('task-description')),
+    owner: nullable(value('task-owner')),
+    due_date: nullable(value('task-due-date')),
+    priority: value('task-priority') || 'normal',
+    completed: false,
+  };
+  if (!payload.title) { alert('Title is required.'); return; }
+  await sbFetch('consulting_action_items', {
+    method: 'POST',
+    headers: { 'Prefer': 'return=minimal' },
+    body: JSON.stringify(payload),
+  });
+  toggleActionForm(false);
+  await reloadCollection('actions');
+}
+
+function renderActionItems() {
+  if (!actionItems.length) {
+    document.getElementById('actions-list').innerHTML = '<div class="state-msg">No action items yet.</div>';
+    return;
+  }
+  document.getElementById('actions-list').innerHTML = actionItems.map(item => `
+    <div class="task-item">
+      <div class="btn-row" style="justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="task-title ${priorityClass(item.priority)}">${escapeHtml(item.title)}</div>
+          <div class="task-meta">${escapeHtml(item.owner || 'Unassigned')} · ${escapeHtml(labelize(item.priority || 'normal'))}${item.due_date ? ' · Due ' + escapeHtml(item.due_date) : ''}${item.completed ? ' · Completed' : ''}</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.82rem;color:var(--muted);">
+          <input type="checkbox" style="width:auto;" ${item.completed ? 'checked disabled' : ''} onchange="completeActionItem('${item.id}', this)" />
+          Done
+        </label>
+      </div>
+      ${item.description ? `<div class="task-body">${escapeHtml(item.description)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function completeActionItem(id, checkbox) {
+  checkbox.disabled = true;
+  try {
+    await sbFetch(`consulting_action_items?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        completed: true,
+        completed_at: new Date().toISOString(),
+        completed_by: sessionStorage.getItem('dl_admin_name') || null,
+      }),
+    });
+    await reloadCollection('actions');
+  } catch (e) {
+    checkbox.checked = false;
+    checkbox.disabled = false;
+    alert(`Failed to complete item: ${e.message}`);
+  }
+}
+
+async function reloadCollection(kind) {
+  if (kind === 'activities') {
+    activities = await sbFetch(`consulting_activities?student_id=eq.${studentId}&select=*&order=deadline.asc`) || [];
+    renderActivities();
+  }
+  if (kind === 'notes') {
+    notes = await sbFetch(`consulting_notes?student_id=eq.${studentId}&select=*&order=created_at.desc`) || [];
+    renderNotes();
+  }
+  if (kind === 'actions') {
+    actionItems = await sbFetch(`consulting_action_items?student_id=eq.${studentId}&select=*&order=due_date.asc`) || [];
+    renderActionItems();
+  }
+}
+
+async function runAi(type) {
+  const cfg = getConfig();
+  if (!cfg.gemini) {
+    document.getElementById('ai-state').textContent = 'Gemini key is not configured.';
+    return;
+  }
+  const output = document.getElementById('ai-output');
+  const state = document.getElementById('ai-state');
+  state.textContent = 'Generating…';
+  output.value = 'Generating…';
+
+  const data = {
+    student: currentStudent,
+    activities,
+    recent_notes: notes.slice(0, 8),
+    action_items: actionItems,
+  };
+  const studentName = currentStudent?.name_ko || currentStudent?.name_en || 'this student';
+  const prompts = {
+    summary: `You are an expert college admissions consultant. Based on the following student data, write a concise 2-3 paragraph summary of this student's profile, strengths, narrative, and current status. Be specific and actionable. Student data: ${JSON.stringify(data)}`,
+    activities: `You are an expert college admissions consultant specializing in boarding school students. Based on this student's profile, narrative, spike, current activities, and grade year, suggest 3-5 specific extracurricular activities, competitions, or programs they should pursue next. For each suggestion, explain why it fits their profile. Student data: ${JSON.stringify(data)}`,
+    kakao: `You are writing on behalf of DanielLab 고등부, a college consulting firm in Korea. Write a warm, professional KakaoTalk message in Korean to the parents of ${studentName}. The message should update them on their child's recent progress and upcoming plans. Keep it concise (3-4 short paragraphs). Base it on: ${JSON.stringify({ recent_notes: data.recent_notes, upcoming_deadlines: upcomingActivities(), recent_activity_results: recentResults() })}`,
+  };
+  lastAiTitle = type === 'activities' ? 'AI Suggested EC Activities' : type === 'kakao' ? 'AI Parent KakaoTalk Draft' : 'AI Student Profile Summary';
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(cfg.gemini)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompts[type] }] }] }),
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error?.message || res.status);
+    const json = await res.json();
+    output.value = json.candidates?.[0]?.content?.parts?.map(p => p.text).join('\n') || 'No response returned.';
+    state.textContent = 'Generated.';
+  } catch (e) {
+    output.value = '';
+    state.textContent = `Generation failed: ${e.message}`;
+  }
+}
+
+async function saveAiAsNote() {
+  const content = document.getElementById('ai-output').value.trim();
+  if (!content || content === 'Generating…') {
+    document.getElementById('ai-state').textContent = 'Generate output before saving.';
+    return;
+  }
+  await sbFetch('consulting_notes', {
+    method: 'POST',
+    headers: { 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      student_id: studentId,
+      note_type: 'ai_summary',
+      author: sessionStorage.getItem('dl_admin_name') || null,
+      title: lastAiTitle,
+      content,
+    }),
+  });
+  document.getElementById('ai-state').textContent = 'Saved as note.';
+  await reloadCollection('notes');
+}
+
+function upcomingActivities() {
+  const now = new Date();
+  return activities.filter(a => a.deadline && new Date(`${a.deadline}T00:00:00`) >= now).slice(0, 5);
+}
+
+function recentResults() {
+  return activities.filter(a => a.result).slice(0, 5);
+}
+
+async function logout() {
+  try { await getClient().auth.signOut(); } catch {}
+  sessionStorage.clear();
+  window.location.href = 'consulting_login.html';
+}
+
+function inputField(id, label, val, type = 'text') {
+  return `<div><label for="${id}">${escapeHtml(label)}</label><input type="${type}" id="${id}" value="${escapeAttr(val)}" /></div>`;
+}
+
+function textareaField(id, label, val) {
+  return `<div><label for="${id}">${escapeHtml(label)}</label><textarea id="${id}">${escapeHtml(val)}</textarea></div>`;
+}
+
+function selectField(id, label, options, selected) {
+  return `
+    <div>
+      <label for="${id}">${escapeHtml(label)}</label>
+      <select id="${id}">
+        ${options.map(o => `<option value="${escapeAttr(o)}" ${o === selected ? 'selected' : ''}>${escapeHtml(o ? labelize(o) : '—')}</option>`).join('')}
+      </select>
+    </div>
+  `;
+}
+
+function teacherSelectField(id, label, selected) {
+  return `
+    <div>
+      <label for="${id}">${escapeHtml(label)}</label>
+      <select id="${id}">
+        <option value="">—</option>
+        ${teachers.map(t => `<option value="${escapeAttr(t.id)}" ${t.id === selected ? 'selected' : ''}>${escapeHtml(t.name)}</option>`).join('')}
+      </select>
+    </div>
+  `;
+}
+
+function statusBadge(status) {
+  const value = status || 'active';
+  const cls = value === 'hold' ? 'badge-hold' : value === 'inactive' ? 'badge-inactive' : value === 'graduated' ? 'badge-gray' : 'badge-active';
+  return `<span class="badge ${cls}">${escapeHtml(labelize(value))}</span>`;
+}
+
+function activityBadge(status) {
+  const value = status || 'planned';
+  const cls = {
+    planned: 'badge-gray',
+    in_progress: 'badge-blue',
+    submitted: 'badge-yellow',
+    completed: 'badge-green',
+    accepted: 'badge-green',
+    rejected: 'badge-red',
+    waitlisted: 'badge-orange',
+    cancelled: 'badge-gray',
+  }[value] || 'badge-gray';
+  return `<span class="badge ${cls}">${escapeHtml(labelize(value))}</span>`;
+}
+
+function noteTypeBadge(type) {
+  const cls = type === 'ai_summary' ? 'badge-blue' : type === 'parent_comms' ? 'badge-orange' : type === 'strategy' ? 'badge-green' : 'badge-gray';
+  return `<span class="badge ${cls}">${escapeHtml(labelize(type || 'note'))}</span>`;
+}
+
+function priorityClass(priority) {
+  return priority === 'urgent' ? 'priority-urgent' : priority === 'high' ? 'priority-high' : priority === 'low' ? 'priority-low' : 'priority-normal';
+}
+
+function value(id) {
+  return document.getElementById(id)?.value.trim() || '';
+}
+
+function nullable(v) {
+  return v || null;
+}
+
+function labelize(value) {
+  return String(value || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function dateValue(date) {
+  if (!date) return Number.MAX_SAFE_INTEGER;
+  return new Date(`${date}T00:00:00`).getTime();
+}
+
+function formatDateTime(value) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#096;');
+}
+
+loadAll();
+</script>
+
+<footer style="text-align:center;padding:32px 24px 16px;font-size:0.72rem;color:#aaa;letter-spacing:0.04em;">
+  Developed by Kevin Choi &nbsp;·&nbsp; Powered by SENECA AI
+</footer>
+</body>
+</html>
